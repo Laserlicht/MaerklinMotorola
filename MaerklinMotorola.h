@@ -3,6 +3,7 @@
   Created by Michael Henzler (Laserlicht), Februar 27, 2018.
   Released under BSD 2-Clause "Simplified" License.
 */
+
 #ifndef MaerklinMotorola_h
 #define MaerklinMotorola_h
 

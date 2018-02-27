@@ -3,6 +3,9 @@
   Created by Michael Henzler (Laserlicht), Februar 27, 2018.
   Released under BSD 2-Clause "Simplified" License.
 */
+
+#include <MaerklinMotorola.h>
+
 MaerklinMotorola::MaerklinMotorola(int p) {
   pin = p;
   DataAvailable = false;

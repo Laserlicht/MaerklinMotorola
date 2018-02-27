@@ -21,7 +21,7 @@ Circuit for getting signal from rail, with optocoupler and signal-led:
         +--------+                          ANODE |                          | ENABLE|           |   |
      +--+        +--------/----------------------------+           +-----------------+           |   |
         +--------+     XXXXXXX                   2| XXXXXXX        |         |7                  |   |
-rail                     X X   +--->              |  X   X  +--->  |         |                   |   |
+ rail                    X X   +--->              |  X   X  +--->  |         |                   |   |
                         X   X  +--->              |   X X   +--->  |         |                   +---+
                        XXXXXXX             CATHODE| XXXXXXX        | +---+   | OUTPUT              |
      +--------------------/----------------------------+           +-+   +-------------------------/----------+   INT Arduino
@@ -39,5 +39,7 @@ rail                     X X   +--->              |  X   X  +--->  |         |  
 													  
 Protocol:
 http://home.mnet-online.de/modelleisenbahn-digital/Dig-tutorial-start.html
+
 http://www.drkoenig.de/digital/motorola.htm
+
 http://www.skrauss.de/modellbahn/Schienenformat.pdf (MFX)

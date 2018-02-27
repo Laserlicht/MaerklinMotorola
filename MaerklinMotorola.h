@@ -1,3 +1,12 @@
+/*
+  MaerklinMotorola.h - Library for decoding the signals from the Märklin-Motorola-protocol. 
+  Created by Michael Henzler (Laserlicht), Februar 27, 2018.
+  Released under BSD 2-Clause "Simplified" License.
+*/
+#ifndef MaerklinMotorola_h
+#define MaerklinMotorola_h
+
+#include "Arduino.h"
 
 
 struct MaerklinMotorolaData {
@@ -32,3 +41,5 @@ private:
   bool sync = false;
   int timings_pos = 0;
 };
+
+#endif

@@ -25,7 +25,7 @@ void MaerklinMotorola::PinChange() {
       bool valid = true;
       
       for(int i=0;i<35;i+=2) { //Bits dekodieren
-        Data.Bits[i/2] = (Data.Timings[i]>(period>>1)) ? 1 : 0;
+        Data.Bits[i/2] = (Data.Timings[i]>(period>>1)) ? 1 : 0; //Länger als die Hälfte: 1
 
         if(i<33) {
           int period_tmp = Data.Timings[i] + Data.Timings[i+1];

@@ -14,14 +14,13 @@ void setup() {
 }
 
 void loop() {
-  if(mm.DataAvailable) {
+  MaerklinMotorolaData* Data = mm.GetData();
+  if(Data) {
     for(int i=0;i<18;i++) {
-      Serial.print(mm.Data.Bits[i]);
+      Serial.print(Data->Bits[i]);
     }
 
     Serial.println();
-
-    mm.DataAvailable = false;
   }
 }
 

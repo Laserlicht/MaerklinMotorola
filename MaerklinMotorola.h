@@ -9,12 +9,23 @@
 
 #include "Arduino.h"
 
+#define MM_QUEUE_LENGTH	10
+
+enum DataGramState
+{
+	DataGramState_Reading,
+	DataGramState_ReadyToParse,
+	DataGramState_Parsed,
+	DataGramState_Validated,
+	DataGramState_Finished,
+	DataGramState_Error,
+};
 
 struct MaerklinMotorolaData {
   byte Bits[18];
   byte Trits[9];
   int Timings[35];
-
+  unsigned long tm_package_delta;
   bool IsMagnet;
   
   int Address;
@@ -26,21 +37,23 @@ struct MaerklinMotorolaData {
 
   int SubAddress;
   bool MagnetState; //bei aus werden normalerweise alle ausgeschaltet
+  DataGramState State;
 };
 
 class MaerklinMotorola {
 public:
   MaerklinMotorola(int p);
   void PinChange();
-
-  bool DataAvailable;
-  MaerklinMotorolaData Data;
+  MaerklinMotorolaData* GetData();
+  void Parse();
 private:
   int pin;
   unsigned long last_tm = 0;
   unsigned long sync_tm = 0;
   bool sync = false;
   int timings_pos = 0;
+  char DataQueueWritePosition = 0;
+  MaerklinMotorolaData DataQueue[MM_QUEUE_LENGTH];
 };
 
 #endif

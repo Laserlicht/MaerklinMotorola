@@ -14,6 +14,7 @@ void setup() {
 }
 
 void loop() {
+  mm.Parse();
   MaerklinMotorolaData* Data = mm.GetData();
   if(Data) {
     for(int i=0;i<18;i++) {

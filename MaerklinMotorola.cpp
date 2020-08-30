@@ -28,9 +28,24 @@ void MaerklinMotorola::Parse() {
 		  int period = DataQueue[QueuePos].Timings[0]+DataQueue[QueuePos].Timings[1]; //bit-laenge berechnen
 		  bool valid = true;
 		  bool parsed = false;
+
+		  DataQueue[QueuePos].IsMagnet = false;
+		  DataQueue[QueuePos].IsMM2 = false;
+		  DataQueue[QueuePos].Address = 0;
+		  DataQueue[QueuePos].SubAddress = 0;
+		  DataQueue[QueuePos].Function = false;
+		  DataQueue[QueuePos].Stop = false;
+		  DataQueue[QueuePos].ChangeDir = false;
+		  DataQueue[QueuePos].Speed = 0;
+		  DataQueue[QueuePos].MagnetState = 0;
+		  DataQueue[QueuePos].IsMM2FunctionOn = false;
+		  DataQueue[QueuePos].MM2FunctionIndex = 0;
+		  DataQueue[QueuePos].MM2Direction = MM2DirectionState_Unavailable;
 		  
-		  for(int i=0;i<35;i+=2) { //Bits dekodieren
-			DataQueue[QueuePos].Bits[i/2] = (DataQueue[QueuePos].Timings[i]>(period>>1)) ? 1 : 0; //Länger als die Hälfte: 1
+		  byte Bits[18];
+		  
+		  for(unsigned char i=0;i<35;i+=2) { //Bits dekodieren
+			Bits[i/2] = (DataQueue[QueuePos].Timings[i]>(period>>1)) ? 1 : 0; //Länger als die Hälfte: 1
 
 			if(i<33) {
 			  int period_tmp = DataQueue[QueuePos].Timings[i] + DataQueue[QueuePos].Timings[i+1];
@@ -38,8 +53,44 @@ void MaerklinMotorola::Parse() {
 			}
 		  }
 
-		  for(int i=0;i<9;i++) { //Trits aus Bits dekodieren
-			DataQueue[QueuePos].Trits[i] = (DataQueue[QueuePos].Bits[i*2] == 1 && DataQueue[QueuePos].Bits[i*2+1] == 1) ? 1 : ((DataQueue[QueuePos].Bits[i*2] == 0 && DataQueue[QueuePos].Bits[i*2+1] == 0) ? 0 : 2);
+		  //The first 5 "trits" are always ternary (MM1 and MM2) - For MM2, the least 4 "trits" are quarternary
+		  for(unsigned char i=0;i<9;i++) { //Trits aus Bits dekodieren
+			if(Bits[i*2] == 0 && Bits[i*2+1] == 0)
+			{
+				//00
+				DataQueue[QueuePos].Trits[i] = 0;
+			}
+			else if(Bits[i*2] == 1 && Bits[i*2+1] == 1)
+			{
+				//11
+				DataQueue[QueuePos].Trits[i] = 1;
+			}
+			else if(Bits[i*2] == 1 && Bits[i*2+1] == 0)
+			{
+				//10
+				DataQueue[QueuePos].Trits[i] = 2;
+				if(i>=5)
+				{
+					//MM1 trailing "trits" only use "11" and "00" so we have MM2 here
+					DataQueue[QueuePos].IsMM2 = true;
+				}
+			}
+			else
+			{
+				//01 -> MM2 only and only for trits 5...9
+				if(i<5)
+				{
+					//Pattern 01 can't occur on trits 0...4 -> invalid input
+					valid = false;
+					break;
+				}
+				else
+				{
+					//MM1 trailing "trits" only use "11" and "00" so we have MM2 here
+					DataQueue[QueuePos].Trits[i] = 3;	
+					DataQueue[QueuePos].IsMM2 = true;
+				}
+			}
 		  }
 
 		  //Decoder
@@ -51,25 +102,69 @@ void MaerklinMotorola::Parse() {
 			if(!DataQueue[QueuePos].IsMagnet) { //Loktelegramm
 			  DataQueue[QueuePos].Function = (DataQueue[QueuePos].Trits[4] == 1) ? true : false;
 
-			  int s = DataQueue[QueuePos].Bits[10] + DataQueue[QueuePos].Bits[12] * 2 + DataQueue[QueuePos].Bits[14] * 4 + DataQueue[QueuePos].Bits[16] * 8;
+			  unsigned char s = Bits[10] + Bits[12] * 2 + Bits[14] * 4 + Bits[16] * 8;
 			  DataQueue[QueuePos].Stop = (s==0) ? true : false;
 			  DataQueue[QueuePos].ChangeDir = (s==1) ? true : false;
 			  DataQueue[QueuePos].Speed = (s==0) ?  0 : s-1;
+			  if(DataQueue[QueuePos].IsMM2)
+			  {
+				//convert MM2 bits to one number
+				unsigned char sMM2 = Bits[17] + Bits[15] * 2 + Bits[13] * 4 + Bits[11] * 8;
+				
+				switch(sMM2)
+				{
+					case 2:
+					case 3:
+					DataQueue[QueuePos].MM2FunctionIndex = 2;
+					DataQueue[QueuePos].IsMM2FunctionOn = sMM2 & 1;
+					break;
+
+					case 4:
+					case 5:
+					DataQueue[QueuePos].MM2Direction = MM2DirectionState_Forward;
+					break;
+
+					case 6:
+					case 7:
+					DataQueue[QueuePos].MM2FunctionIndex = 3;
+					DataQueue[QueuePos].IsMM2FunctionOn = sMM2 & 1;
+					break;
+
+					case 10:
+					case 11:
+					DataQueue[QueuePos].MM2Direction = MM2DirectionState_Backward;
+					break;
+
+					case 12:
+					case 13:
+					DataQueue[QueuePos].MM2FunctionIndex = 1;
+					DataQueue[QueuePos].IsMM2FunctionOn = sMM2 & 1;
+					break;
+
+					case 14:
+					case 15:
+					DataQueue[QueuePos].MM2FunctionIndex = 4;
+					DataQueue[QueuePos].IsMM2FunctionOn = sMM2 & 1;
+					break;
+					
+					default:
+					break;
+				}
+			  }
 
 			  parsed=true;
 			} else { //Magnettelegramm
 			  if(DataQueue[QueuePos].Trits[4]==0) {
-				int s = DataQueue[QueuePos].Bits[10] + DataQueue[QueuePos].Bits[12] * 2 + DataQueue[QueuePos].Bits[14] * 4;
+				unsigned char s = Bits[10] + Bits[12] * 2 + Bits[14] * 4;
 				DataQueue[QueuePos].SubAddress = s;
-				DataQueue[QueuePos].MagnetState = (DataQueue[QueuePos].Bits[16]==1) ? true : false;
-				
+				DataQueue[QueuePos].MagnetState = (Bits[16]==1) ? true : false;
 				parsed=true;
 			  }
 			}  
 		  }	
 		  if(parsed) {
 			  //Get previous DataGram from Queue
-			  int previousDataGramPos = QueuePos > 0 ? QueuePos-1 : MM_QUEUE_LENGTH - 1;
+			  int previousDataGramPos = QueuePos > 0 ? QueuePos - 1 : MM_QUEUE_LENGTH - 1;
 			  DataQueue[QueuePos].State = DataGramState_Parsed;
 			  if(DataGramState_Parsed == DataQueue[previousDataGramPos].State) {
 				  //Check if previous DataGram was identical
@@ -110,6 +205,7 @@ void MaerklinMotorola::PinChange() {
 	  {
 		 DataQueueWritePosition = 0;
 	  }
+	  
 	  DataQueue[DataQueueWritePosition].State = DataGramState_Reading;
       sync = false;
       timings_pos = 0;

@@ -13,25 +13,25 @@ void setup() {
 }
 
 void loop() {
-  if(mm.DataAvailable) {
+  mm.Parse();
+  MaerklinMotorolaData* Data = mm.GetData();
+  if(Data) {
     /*for(int i=0;i<9;i++) {
-      Serial.print(mm.Data.Trits[i]);
+      Serial.print(Data->Trits[i]);
     }*/
     
-    /*Serial.print("Address: "); Serial.print(mm.Data.Address);
-    Serial.print(" -  Function: "); Serial.print(mm.Data.Function);
-    Serial.print(" -  Stop: "); Serial.print(mm.Data.Stop);
-    Serial.print(" -  ChangeDir: "); Serial.print(mm.Data.ChangeDir);
-    Serial.print(" -  Speed: "); Serial.print(mm.Data.Speed);
-    Serial.print(" -  Magnet: " + String(mm.Data.IsMagnet ? "yes" : "no"));
+    /*Serial.print("Address: "); Serial.print(Data->Address);
+    Serial.print(" -  Function: "); Serial.print(Data->Function);
+    Serial.print(" -  Stop: "); Serial.print(Data->Stop);
+    Serial.print(" -  ChangeDir: "); Serial.print(Data->ChangeDir);
+    Serial.print(" -  Speed: "); Serial.print(Data->Speed);
+    Serial.print(" -  Magnet: " + String(Data->IsMagnet ? "yes" : "no"));
     
     Serial.println();*/
 
-    if(!mm.Data.IsMagnet && mm.Data.Address == 24) {
-      digitalWrite(LED_BUILTIN, mm.Data.Function);
+    if(!Data->IsMagnet && Data->Address == 24) {
+      digitalWrite(LED_BUILTIN, Data->Function);
     }
-
-    mm.DataAvailable = false;
   }
 }
 

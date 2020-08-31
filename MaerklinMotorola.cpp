@@ -1,6 +1,6 @@
 /*
   MaerklinMotorola.cpp - Library for decoding the signals from the Märklin-Motorola-protocol. 
-  Created by Michael Henzler (Laserlicht), Februar 27, 2018.
+  Created by Michael H. (Laserlicht), Februar 27, 2018.
   Released under BSD 2-Clause "Simplified" License.
 */
 

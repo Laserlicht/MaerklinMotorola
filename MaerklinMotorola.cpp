@@ -41,6 +41,8 @@ void MaerklinMotorola::Parse() {
 		  DataQueue[QueuePos].IsMM2FunctionOn = false;
 		  DataQueue[QueuePos].MM2FunctionIndex = 0;
 		  DataQueue[QueuePos].MM2Direction = MM2DirectionState_Unavailable;
+		  DataQueue[QueuePos].DecoderState = MM2DecoderState_Unavailable;
+		  DataQueue[QueuePos].PortAddress = 0;
 		  
 		  byte Bits[18];
 		  
@@ -156,8 +158,12 @@ void MaerklinMotorola::Parse() {
 			} else { //Magnettelegramm
 			  if(DataQueue[QueuePos].Trits[4]==0) {
 				unsigned char s = Bits[10] + Bits[12] * 2 + Bits[14] * 4;
-				DataQueue[QueuePos].SubAddress = s;
-				DataQueue[QueuePos].MagnetState = (Bits[16]==1) ? true : false;
+				DataQueue[QueuePos].SubAddress = s;				
+				DataQueue[QueuePos].PortAddress = (( DataQueue[QueuePos].Address - 1) * 4) + (s >> 1) + 1;
+				if (Bits[16]==1) {
+					DataQueue[QueuePos].MagnetState = true;
+					DataQueue[QueuePos].DecoderState = Bits[10] ? MM2DecoderState_Green : MM2DecoderState_Red;				    
+				}
 				parsed=true;
 			  }
 			}  

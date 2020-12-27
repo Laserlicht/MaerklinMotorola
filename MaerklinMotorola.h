@@ -28,6 +28,13 @@ enum MM2DirectionState
 	MM2DirectionState_Backward,
 };
 
+enum MM2DecoderState
+{
+	MM2DecoderState_Unavailable,
+	MM2DecoderState_Red,
+	MM2DecoderState_Green,
+};
+
 struct MaerklinMotorolaData {
   byte Trits[9];
   int Timings[35];
@@ -41,6 +48,7 @@ struct MaerklinMotorolaData {
   unsigned char MM2FunctionIndex;
 
   unsigned char SubAddress;
+  unsigned char PortAddress; // verbose "port" address (1 to 256 / 320)
 
   DataGramState State;
   
@@ -48,6 +56,7 @@ struct MaerklinMotorolaData {
   bool Stop;
   bool ChangeDir;
   bool MagnetState; //bei aus werden normalerweise alle ausgeschaltet
+  MM2DecoderState DecoderState; // red (false) or green (true)
   bool IsMagnet;
   bool IsMM2;
   bool IsMM2FunctionOn;

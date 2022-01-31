@@ -55,7 +55,7 @@ struct MaerklinMotorolaData {
   bool Function;
   bool Stop;
   bool ChangeDir;
-  bool MagnetState; //bei aus werden normalerweise alle ausgeschaltet
+  bool MagnetState; //with off normally all are switched off
   MM2DecoderState DecoderState; // red (false) or green (true)
   bool IsMagnet;
   bool IsMM2;

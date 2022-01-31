@@ -1,6 +1,5 @@
 #include <MaerklinMotorola.h>
 
-
 #define INPUT_PIN 2
 
 MaerklinMotorola mm(INPUT_PIN);

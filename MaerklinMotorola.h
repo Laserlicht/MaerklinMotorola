@@ -1,6 +1,6 @@
 /*
   MaerklinMotorola.h - Library for decoding the signals from the Märklin-Motorola-protocol. 
-  Created by Michael H. (Laserlicht), Februar 27, 2018.
+  Created by Laserlicht, Februar 27, 2018.
   Released under BSD 2-Clause "Simplified" License.
 */
 
@@ -55,7 +55,7 @@ struct MaerklinMotorolaData {
   bool Function;
   bool Stop;
   bool ChangeDir;
-  bool MagnetState; //bei aus werden normalerweise alle ausgeschaltet
+  bool MagnetState; //with off normally all are switched off
   MM2DecoderState DecoderState; // red (false) or green (true)
   bool IsMagnet;
   bool IsMM2;

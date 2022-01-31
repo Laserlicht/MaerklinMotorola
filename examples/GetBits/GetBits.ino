@@ -3,7 +3,7 @@
 
 #define INPUT_PIN 2
 
-volatile MaerklinMotorola mm(INPUT_PIN);
+MaerklinMotorola mm(INPUT_PIN);
 
 void setup() {
   attachInterrupt(digitalPinToInterrupt(INPUT_PIN), isr, CHANGE);

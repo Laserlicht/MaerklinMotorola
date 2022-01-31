@@ -25,7 +25,7 @@ MaerklinMotorolaData* MaerklinMotorola::GetData() {
 void MaerklinMotorola::Parse() {
 	for(int QueuePos=0; QueuePos<MM_QUEUE_LENGTH;QueuePos++) {
 		if(DataGramState_ReadyToParse == DataQueue[QueuePos].State) {
-		  int period = DataQueue[QueuePos].Timings[0]+DataQueue[QueuePos].Timings[1]; //bit-laenge berechnen
+		  int period = DataQueue[QueuePos].Timings[0]+DataQueue[QueuePos].Timings[1]; //calculate bit length
 		  bool valid = true;
 		  bool parsed = false;
 
@@ -46,8 +46,8 @@ void MaerklinMotorola::Parse() {
 		  
 		  byte Bits[18];
 		  
-		  for(unsigned char i=0;i<35;i+=2) { //Bits dekodieren
-			Bits[i/2] = (DataQueue[QueuePos].Timings[i]>(period>>1)) ? 1 : 0; //Länger als die Hälfte: 1
+		  for(unsigned char i=0;i<35;i+=2) { //decode bits
+			Bits[i/2] = (DataQueue[QueuePos].Timings[i]>(period>>1)) ? 1 : 0; //longer than half: 1
 
 			if(i<33) {
 			  int period_tmp = DataQueue[QueuePos].Timings[i] + DataQueue[QueuePos].Timings[i+1];
@@ -56,7 +56,7 @@ void MaerklinMotorola::Parse() {
 		  }
 
 		  //The first 5 "trits" are always ternary (MM1 and MM2) - For MM2, the least 4 "trits" are quarternary
-		  for(unsigned char i=0;i<9;i++) { //Trits aus Bits dekodieren
+		  for(unsigned char i=0;i<9;i++) { //decode trits from bits
 			if(Bits[i*2] == 0 && Bits[i*2+1] == 0)
 			{
 				//00
@@ -96,8 +96,8 @@ void MaerklinMotorola::Parse() {
 		  }
 
 		  //Decoder
-		  if(DataQueue[QueuePos].tm_package_delta > 1300 && DataQueue[QueuePos].tm_package_delta < 4200 && valid) { //Protokollspezifische Telegramlänge: Weichen oder Lokprotokoll
-			DataQueue[QueuePos].IsMagnet = ((period < 150) ? true : false);  //Unterscheidung Protokoll (Fest-Zeit)
+		  if(DataQueue[QueuePos].tm_package_delta > 1300 && DataQueue[QueuePos].tm_package_delta < 4200 && valid) { //protocol-specific telegram length: turnouts or locomotive protocol
+			DataQueue[QueuePos].IsMagnet = ((period < 150) ? true : false);  //distinction protocol (fixed-time)
 			
 			DataQueue[QueuePos].Address = DataQueue[QueuePos].Trits[3] * 27 + DataQueue[QueuePos].Trits[2] * 9 + DataQueue[QueuePos].Trits[1] * 3 + DataQueue[QueuePos].Trits[0];
 
@@ -155,7 +155,7 @@ void MaerklinMotorola::Parse() {
 			  }
 
 			  parsed=true;
-			} else { //Magnettelegramm
+			} else { //magnet telegram
 			  if(DataQueue[QueuePos].Trits[4]==0) {
 				unsigned char s = Bits[10] + Bits[12] * 2 + Bits[14] * 4;
 				DataQueue[QueuePos].SubAddress = s;				
@@ -188,12 +188,11 @@ void MaerklinMotorola::Parse() {
 }
 
 void MaerklinMotorola::PinChange() {
-  //bool state = digitalRead(pin);
   unsigned long tm = micros();
   unsigned long tm_delta = tm - last_tm;
 
-  if(sync) { //erst nach syncronisation bits sammeln
-    DataQueue[DataQueueWritePosition].Timings[timings_pos] = int(tm_delta); //ablage des zeitunterschieds zwischen den letzten flanken
+  if(sync) { //collect bits only after syncronization
+    DataQueue[DataQueueWritePosition].Timings[timings_pos] = int(tm_delta); //filing the time difference between the last edges
     timings_pos++;
 
 	if(tm_delta>500) {
@@ -203,7 +202,7 @@ void MaerklinMotorola::PinChange() {
 		sync_tm = tm;
 	}
     if(timings_pos==35) {
-      DataQueue[DataQueueWritePosition].tm_package_delta = tm - sync_tm; //paket-laenge berechen
+      DataQueue[DataQueueWritePosition].tm_package_delta = tm - sync_tm; //calculate package length
 	  DataQueue[DataQueueWritePosition].State = DataGramState_ReadyToParse;
 	  DataQueueWritePosition ++;
 	  //Queue end - go to queue start
@@ -217,7 +216,7 @@ void MaerklinMotorola::PinChange() {
       timings_pos = 0;
     }
   } else {
-    if(tm_delta>500) { //Protokollspezifische Pausen-Zeit
+    if(tm_delta>500) { //protocol-specific pause time
       sync = true;
       sync_tm = tm;
     }

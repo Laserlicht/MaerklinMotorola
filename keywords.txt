@@ -9,6 +9,8 @@ MaerklinMotorolaData	KEYWORD1
 #######################################
 
 PinChange	KEYWORD2
+GetData	  KEYWORD2
+Parse	    KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

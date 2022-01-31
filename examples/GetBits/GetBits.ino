@@ -17,8 +17,8 @@ void loop() {
   mm.Parse();
   MaerklinMotorolaData* Data = mm.GetData();
   if(Data) {
-    for(int i=0;i<18;i++) {
-      Serial.print(Data->Bits[i]);
+    for(int i=0;i<9;i++) {
+      Serial.print(Data->Trits[i]);
     }
 
     Serial.println();
